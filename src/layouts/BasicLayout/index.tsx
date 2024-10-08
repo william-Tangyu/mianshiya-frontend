@@ -13,6 +13,8 @@ import Link from "next/link";
 import GlobalFooter from "@/components/GlobalFooter";
 import "./index.css";
 import menus from "../../../config/menu";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/stores";
 
 const SearchInput = () => {
   return (
@@ -49,6 +51,8 @@ interface Props {
 export default function BasicLayout({ children }: Props) {
   const pathname = usePathname();
 
+  const loginUser = useSelector((state: RootState) => state.loginUser);
+
   return (
     <div
       id="basicLayout"
@@ -72,9 +76,9 @@ export default function BasicLayout({ children }: Props) {
           pathname,
         }}
         avatarProps={{
-          src: "/assets/logo.png",
+          src: loginUser.userAvatar || "/assets/logo.png",
           size: "small",
-          title: "William",
+          title: loginUser.userName || "William",
           render: (props, dom) => {
             return (
               <Dropdown
