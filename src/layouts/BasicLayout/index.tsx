@@ -12,9 +12,11 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import GlobalFooter from "@/components/GlobalFooter";
 import "./index.css";
-import menus from "../../../config/menu";
+import {menus} from "../../../config/menus";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores";
+import getAccessibleMenus from "@/access/menuAccess";
+import { useState } from "react";
 
 const SearchInput = () => {
   return (
@@ -52,6 +54,7 @@ export default function BasicLayout({ children }: Props) {
   const pathname = usePathname();
 
   const loginUser = useSelector((state: RootState) => state.loginUser);
+
 
   return (
     <div
@@ -125,7 +128,7 @@ export default function BasicLayout({ children }: Props) {
         onMenuHeaderClick={(e) => console.log(e)}
         // 定义有哪些菜单
         menuDataRender={() => {
-          return menus;
+          return getAccessibleMenus(loginUser,menus);
         }}
         // 定义菜单项如何渲染
         menuItemRender={(item, dom) => (

@@ -8,25 +8,31 @@ import store, { AppDispatch } from "@/stores";
 import { Provider, useDispatch } from "react-redux";
 import { getLoginUserUsingGet } from "@/api/userController";
 import { setLoginUser } from "@/stores/loginUser";
+import { usePathname } from "next/navigation";
+import AccessLayout from "@/access/accessLayout";
+import ACCESS_ENUM from "@/access/accessEnum";
 
 const InitLayout: React.FC<
   Readonly<{
     children: React.ReactNode;
   }>
 > = ({ children }) => {
+  const pathname = usePathname();
   const dispatch = useDispatch<AppDispatch>();
 
   // 初始化全局用户状态
   const doInitLoginUser = useCallback(async () => {
-    // 获取用户信息
-    const res = await getLoginUserUsingGet();
-    if (res.data) {
-      //dispatch(setLoginUser(res.data));
-    } else {
-      setTimeout(() => {
-        const testUser = { userName: "测试登陆", id: 1 };
-        dispatch(setLoginUser(testUser));
-      }, 3000);
+    if (
+      !pathname.startsWith("/user/login") &&
+      !pathname.startsWith("/user/register")
+    ) {
+      // 获取用户信息
+      const res = await getLoginUserUsingGet();
+      if (res.data) {
+        //dispatch(setLoginUser(res.data));
+
+      } else {
+      }
     }
   }, []);
 
@@ -48,7 +54,9 @@ export default function RootLayout({
         <AntdRegistry>
           <Provider store={store}>
             <InitLayout>
-              <BasicLayout>{children}</BasicLayout>
+              <BasicLayout>
+                <AccessLayout>{children}</AccessLayout>
+              </BasicLayout>
             </InitLayout>
           </Provider>
         </AntdRegistry>
