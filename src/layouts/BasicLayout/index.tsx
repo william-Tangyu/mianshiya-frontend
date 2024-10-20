@@ -3,48 +3,25 @@
 import {
   GithubFilled,
   LogoutOutlined,
-  SearchOutlined,
 } from "@ant-design/icons";
 import { ProLayout } from "@ant-design/pro-components";
-import { Dropdown, Input } from "antd";
+import { Dropdown, message } from "antd";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import GlobalFooter from "@/components/GlobalFooter";
 import "./index.css";
-import {menus} from "../../../config/menus";
+import { menus } from "../../../config/menus";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores";
 import getAccessibleMenus from "@/access/menuAccess";
-import { useState } from "react";
+import { userLogoutUsingPost } from "@/api/userController";
+import { AppDispatch } from "@/stores";
+import { setLoginUser } from "@/stores/loginUser";
+import { DEFAULT_USER } from "@/constants/user";
+import { useRouter } from "next/navigation";
+import SearchInput from "./components/SearchInput";
 
-const SearchInput = () => {
-  return (
-    <div
-      key="SearchOutlined"
-      aria-hidden
-      style={{
-        display: "flex",
-        alignItems: "center",
-        marginInlineEnd: 24,
-      }}
-      onMouseDown={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-      }}
-    >
-      <Input
-        style={{
-          borderRadius: 4,
-          marginInlineEnd: 12,
-        }}
-        prefix={<SearchOutlined />}
-        placeholder="搜索题目"
-        variant="borderless"
-      />
-    </div>
-  );
-};
 
 interface Props {
   children: React.ReactNode;
@@ -54,7 +31,21 @@ export default function BasicLayout({ children }: Props) {
   const pathname = usePathname();
 
   const loginUser = useSelector((state: RootState) => state.loginUser);
-
+  const dispatch = useDispatch<AppDispatch>();
+  const router = useRouter();
+  /**
+   * 用户注销
+   */
+  const userLogout = async () => {
+    try {
+      await userLogoutUsingPost();
+      message.success("已退出登录！");
+      dispatch(setLoginUser(DEFAULT_USER));
+      router.replace("/user/login");
+    } catch (e: any) {
+      message.error("操作失败," + e.message);
+    }
+  };
 
   return (
     <div
@@ -83,6 +74,15 @@ export default function BasicLayout({ children }: Props) {
           size: "small",
           title: loginUser.userName || "William",
           render: (props, dom) => {
+            if(!loginUser.id){
+              return <div onClick={ () => {
+                router.push("/user/login");
+              }
+
+              }>
+                {dom}
+              </div>
+            }
             return (
               <Dropdown
                 menu={{
@@ -93,6 +93,12 @@ export default function BasicLayout({ children }: Props) {
                       label: "退出登录",
                     },
                   ],
+                  onClick: async (event: { key: React.Key }) => {
+                    const { key } = event;
+                    if (key === "logout") {
+                      userLogout();
+                    }
+                  },
                 }}
               >
                 {dom}
@@ -128,7 +134,7 @@ export default function BasicLayout({ children }: Props) {
         onMenuHeaderClick={(e) => console.log(e)}
         // 定义有哪些菜单
         menuDataRender={() => {
-          return getAccessibleMenus(loginUser,menus);
+          return getAccessibleMenus(loginUser, menus);
         }}
         // 定义菜单项如何渲染
         menuItemRender={(item, dom) => (

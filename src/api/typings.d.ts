@@ -426,6 +426,7 @@ declare namespace API {
     title?: string;
     updateTime?: string;
     userId?: number;
+    questionBankId?: number;
     viewNum?: number;
   };
 

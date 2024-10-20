@@ -29,7 +29,7 @@ const InitLayout: React.FC<
       // 获取用户信息
       const res = await getLoginUserUsingGet();
       if (res.data) {
-        //dispatch(setLoginUser(res.data));
+        dispatch(setLoginUser(res.data));
 
       } else {
       }
